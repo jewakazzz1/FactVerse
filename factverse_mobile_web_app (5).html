@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="th" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FactVerse - จักรวาลแห่งความรู้</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cosmic: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#1e1b4b',
+                        },
+                        violetAccent: '#8b5cf6',
+                        pinkNeon: '#ec4899',
+                        warmYellow: '#f59e0b',
+                    },
+                    fontFamily: {
+                        sans: ['Kanit', 'Prompt', 'Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts for Thai Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Prompt:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Lock Zoom & Mobile Touch Optimization */
+        html, body {
+            touch-action: manipulation;
+            -webkit-text-size-adjust: 100%;
+            overscroll-behavior-y: none;
+            font-size: 16px; /* Strict 16px minimum base font */
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* Glassmorphism Styles */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            box-shadow: 0 10px 25px -8px rgba(99, 102, 241, 0.16);
+        }
+
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .glass-badge {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(8px);
+        }
+
+        /* 3D Flip Card CSS with strict containment */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+
+        .flip-card-inner.is-flipped {
+            transform: rotateY(180deg);
+        }
+
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 1.5rem;
+            overflow: hidden;
+        }
+
+        .flip-card-back {
+            transform: rotateY(180deg);
+        }
+
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.3);
+            border-radius: 10px;
+        }
+
+        /* Toast notification animation */
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(10px); }
+            15% { opacity: 1; transform: translateY(0); }
+            85% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-10px); }
+        }
+        .animate-toast {
+            animation: fadeInOut 2s ease-in-out forwards;
+        }
+    </style>
+</head>
+
+<body class="h-full bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 text-cosmic-900 font-sans flex flex-col items-center justify-center p-0 m-0 overflow-hidden">
+
+    <!-- Mobile App Simulator Wrapper -->
+    <div class="w-full max-w-md h-full sm:h-[92vh] sm:max-h-[850px] bg-white/40 sm:rounded-[2.5rem] sm:border-8 sm:border-white/80 shadow-2xl flex flex-col overflow-hidden relative">
+
+        <!-- Top Header Banner -->
+        <header class="glass-card px-5 py-3.5 z-30 flex items-center justify-between border-b border-white/50 shrink-0">
+            <div class="flex items-center space-x-2.5">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cosmic-600 via-violetAccent to-pinkNeon flex items-center justify-center text-white shadow-md text-lg font-bold">
+                    ✨
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-cosmic-700 to-violetAccent bg-clip-text text-transparent">FactVerse</h1>
+                    <p class="text-xs font-medium text-gray-500">จักรวาลแห่งความรู้</p>
+                </div>
+            </div>
+            
+            <!-- Favorites Counter Tag -->
+            <div id="favoriteCounterHeader" class="glass-badge px-3 py-1.5 rounded-full text-xs font-semibold text-cosmic-700 flex items-center gap-1.5 border border-indigo-100 shadow-sm cursor-pointer hover:bg-white" onclick="switchTab(2)">
+                <i class="fa-solid fa-heart text-pinkNeon"></i>
+                <span id="favCountBadge">0</span>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-y-auto custom-scrollbar p-4 relative pb-24">
+
+            <!-- TAB 1: RANDOM FACT (HOME) -->
+            <section id="tab1" class="tab-content flex flex-col gap-3.5">
+                
+                <!-- Today's Banner (Instant Fact Revealed Directly) -->
+                <div class="glass-card rounded-2xl p-4 border border-white/80 shadow-sm relative overflow-hidden bg-gradient-to-r from-indigo-50/90 via-purple-50/90 to-pink-50/80 shrink-0">
+                    <div class="absolute -right-3 -bottom-3 text-5xl opacity-15">📅</div>
+                    
+                    <div class="flex items-center justify-between mb-1.5">
+                        <div class="flex items-center gap-1.5 text-xs font-bold text-cosmic-600 uppercase tracking-wider">
+                            <i class="fa-regular fa-calendar-star"></i>
+                            <span id="currentDateText">วันพฤหัสบดีที่ 8 ตุลาคม 2569</span>
+                        </div>
+                        <span id="specialBadgeTag" class="hidden px-2 py-0.5 bg-pink-100 text-pinkNeon rounded-full text-[10px] font-bold">
+                            วันสำคัญพิเศษ 🎉
+                        </span>
+                    </div>
+
+                    <h2 id="todaySpecialTitle" class="text-base font-bold text-cosmic-900 leading-snug mb-1">
+                        เรื่องน่ารู้ประจำวัน ✨
+                    </h2>
+                    
+                    <!-- Direct Fact Answer Shown Immediately -->
+                    <div class="bg-white/80 rounded-xl p-3 border border-indigo-100/80 shadow-inner mt-2">
+                        <p id="todaySpecialHook" class="text-sm font-bold text-cosmic-700 mb-1 leading-snug">
+                            กระดูกต้นขาเป็นกระดูกที่แข็งแรงที่สุดในร่างกายมนุษย์
+                        </p>
+                        <p id="todaySpecialDesc" class="text-xs text-gray-700 leading-relaxed">
+                            กระดูกต้นขา (Femur) สามารถรับน้ำหนักแรงกดได้มากกว่าคอนกรีตที่มีขนาดเท่ากันหลายเท่า!
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Category Dropdown Filter -->
+                <div class="flex items-center gap-2 shrink-0">
+                    <label for="categorySelect" class="text-sm font-semibold text-gray-700 shrink-0">หมวดหมู่:</label>
+                    <div class="relative w-full">
+                        <select id="categorySelect" class="w-full bg-white/90 border border-indigo-200 rounded-xl px-3.5 py-2.5 text-sm font-medium text-cosmic-900 focus:outline-none focus:ring-2 focus:ring-cosmic-500 shadow-sm appearance-none cursor-pointer pr-8">
+                            <!-- Options populated via JavaScript -->
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-cosmic-600">
+                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3D Flip Card Container (Fixed height constraint prevents button overlap) -->
+                <div class="perspective-1000 w-full h-[320px] shrink-0 relative my-0.5 z-10">
+                    <div id="flipCardInner" class="flip-card-inner cursor-pointer">
+                        
+                        <!-- Card Front -->
+                        <div class="flip-card-front glass-card p-5 flex flex-col justify-between border-2 border-white/90 shadow-xl bg-gradient-to-br from-white/95 via-indigo-50/80 to-purple-50/80">
+                            <div class="flex justify-between items-center z-10">
+                                <span id="cardCategoryFront" class="px-3 py-1 bg-cosmic-100 text-cosmic-700 rounded-full text-xs font-semibold">
+                                    วิทยาศาสตร์ & อวกาศ
+                                </span>
+                                <button id="favBtnFront" class="w-11 h-11 rounded-full bg-white shadow-md flex items-center justify-center text-gray-400 hover:text-pinkNeon transition-all active:scale-90 min-w-[44px] min-h-[44px]">
+                                    <i class="fa-solid fa-heart text-lg"></i>
+                                </button>
+                            </div>
+
+                            <div class="text-center my-auto px-1 py-2">
+                                <div id="cardIconFront" class="text-4xl mb-2.5 animate-bounce">❓</div>
+                                <p id="cardHookText" class="text-base font-bold text-cosmic-900 leading-snug">
+                                    แตะเพื่อเปิดอ่านเกร็ดน่ารู้!
+                                </p>
+                                <span class="inline-block mt-3 text-[11px] text-cosmic-600 font-medium bg-cosmic-50 px-3 py-1 rounded-full border border-cosmic-100 shadow-sm">
+                                    <i class="fa-solid fa-hand-pointer mr-1"></i> แตะเพื่อหมุนพลิกอ่าน
+                                </span>
+                            </div>
+
+                            <div class="text-center text-[11px] text-gray-400">
+                                FactVerse ID: #<span id="factIdFront">001</span>
+                            </div>
+                        </div>
+
+                        <!-- Card Back -->
+                        <div class="flip-card-back glass-card p-4 flex flex-col justify-between border-2 border-indigo-200 shadow-xl bg-gradient-to-br from-white via-purple-50/95 to-indigo-50/95">
+                            <div class="flex justify-between items-center z-10">
+                                <span id="cardCategoryBack" class="px-3 py-1 bg-violetAccent/10 text-violetAccent rounded-full text-xs font-semibold">
+                                    วิทยาศาสตร์ & อวกาศ
+                                </span>
+                                <button id="favBtnBack" class="w-11 h-11 rounded-full bg-white shadow-md flex items-center justify-center text-gray-400 hover:text-pinkNeon transition-all active:scale-90 min-w-[44px] min-h-[44px]">
+                                    <i class="fa-solid fa-heart text-lg"></i>
+                                </button>
+                            </div>
+
+                            <!-- Fact Detailed Description -->
+                            <div class="my-auto text-center px-1 py-1 overflow-hidden">
+                                <h3 id="cardTitleBack" class="text-sm font-bold text-cosmic-900 mb-1.5 leading-snug">
+                                    หัวข้อความรู้
+                                </h3>
+                                <p id="cardDetailBack" class="text-xs text-gray-800 leading-relaxed max-h-[105px] overflow-y-auto custom-scrollbar px-1">
+                                    รายละเอียดเกร็ดความรู้จะแสดงตรงนี้อย่างครบถ้วน สนุกสนาน และอ่านง่าย
+                                </p>
+                            </div>
+
+                            <!-- Mind-Blowing Meter (Gauge) -->
+                            <div class="border-t border-indigo-100/80 pt-2 shrink-0">
+                                <p class="text-[11px] font-bold text-center text-cosmic-700 mb-1">
+                                    🤯 Mind-Blowing Meter (ระดับความพีค)
+                                </p>
+                                
+                                <div class="grid grid-cols-3 gap-1 mb-1.5" id="meterButtons">
+                                    <button onclick="voteFact('mindBlowing')" class="py-1.5 px-1 bg-white hover:bg-purple-50 rounded-xl border border-indigo-100 text-[11px] font-medium text-cosmic-900 shadow-sm flex flex-col items-center justify-center min-h-[44px] active:scale-95 transition-transform">
+                                        <span>🤯 พีคมาก</span>
+                                        <span id="cntMindBlowing" class="text-[10px] font-bold text-cosmic-600 mt-0.5">0%</span>
+                                    </button>
+                                    <button onclick="voteFact('aha')" class="py-1.5 px-1 bg-white hover:bg-purple-50 rounded-xl border border-indigo-100 text-[11px] font-medium text-cosmic-900 shadow-sm flex flex-col items-center justify-center min-h-[44px] active:scale-95 transition-transform">
+                                        <span>✨ ว้าวมาก</span>
+                                        <span id="cntAha" class="text-[10px] font-bold text-cosmic-600 mt-0.5">0%</span>
+                                    </button>
+                                    <button onclick="voteFact('meh')" class="py-1.5 px-1 bg-white hover:bg-purple-50 rounded-xl border border-indigo-100 text-[11px] font-medium text-cosmic-900 shadow-sm flex flex-col items-center justify-center min-h-[44px] active:scale-95 transition-transform">
+                                        <span>💡 เคยรู้แล้ว</span>
+                                        <span id="cntMeh" class="text-[10px] font-bold text-cosmic-600 mt-0.5">0%</span>
+                                    </button>
+                                </div>
+
+                                <!-- Progress Bar Visual -->
+                                <div class="w-full bg-indigo-100 h-2 rounded-full overflow-hidden flex">
+                                    <div id="barMindBlowing" class="bg-gradient-to-r from-pinkNeon to-purple-500 h-full transition-all duration-500" style="width: 33%"></div>
+                                    <div id="barAha" class="bg-gradient-to-r from-purple-400 to-indigo-500 h-full transition-all duration-500" style="width: 33%"></div>
+                                    <div id="barMeh" class="bg-gray-300 h-full transition-all duration-500" style="width: 34%"></div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Next Fact Button (Clear isolated layer) -->
+                <div class="pt-1 shrink-0 z-20">
+                    <button id="nextFactBtn" class="w-full py-3.5 bg-gradient-to-r from-cosmic-600 via-violetAccent to-pinkNeon text-white rounded-2xl font-bold text-base shadow-lg shadow-indigo-300/50 hover:opacity-95 active:scale-[0.98] transition-all flex items-center justify-center gap-2 min-h-[52px]">
+                        <span>สุ่ม Fact ต่อไป ✨</span>
+                    </button>
+                </div>
+
+            </section>
+
+            <!-- TAB 2: FAVORITES -->
+            <section id="tab2" class="tab-content hidden space-y-4">
+                <div class="flex justify-between items-center mb-1">
+                    <div>
+                        <h2 class="text-lg font-bold text-cosmic-900">รายการโปรดของคุณ</h2>
+                        <p class="text-xs text-gray-500">เรื่องน่ารู้ที่คุณกดบันทึกหัวใจไว้</p>
+                    </div>
+                    <span id="favCountTag" class="px-3 py-1 bg-pink-100 text-pinkNeon rounded-full text-xs font-bold">
+                        0 รายการ
+                    </span>
+                </div>
+
+                <!-- Favorites Container -->
+                <div id="favoritesList" class="space-y-3">
+                    <!-- Dynamic List or Empty State -->
+                </div>
+            </section>
+
+            <!-- TAB 3: EXPLORE ALL & SEARCH -->
+            <section id="tab3" class="tab-content hidden space-y-4">
+                <div>
+                    <h2 class="text-lg font-bold text-cosmic-900">คลัง Fact ทั้งหมด</h2>
+                    <p class="text-xs text-gray-500">ค้นหาและสำรวจเรื่องน่ารู้ในจักรวาล FactVerse</p>
+                </div>
+
+                <!-- Search Input & Filter Pills -->
+                <div class="space-y-2.5">
+                    <div class="relative">
+                        <input type="text" id="searchInput" placeholder="พิมพ์คำค้นหา (เช่น อวกาศ, แมว, ประวัติศาสตร์)..." class="w-full bg-white/90 border border-indigo-200 rounded-xl pl-10 pr-4 py-3 text-base text-cosmic-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cosmic-500 shadow-sm">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-gray-400 text-base"></i>
+                    </div>
+
+                    <!-- Horizontal Category Pills -->
+                    <div class="flex gap-2 overflow-x-auto custom-scrollbar py-1 text-xs" id="exploreCategoryPills">
+                        <!-- Populated via JS -->
+                    </div>
+                </div>
+
+                <!-- Facts Results Container -->
+                <div id="exploreList" class="space-y-3 pt-1">
+                    <!-- Dynamic rendering -->
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Fixed Bottom Navigation -->
+        <nav class="glass-nav absolute bottom-0 left-0 right-0 h-20 px-6 flex justify-around items-center z-40">
+            <button onclick="switchTab(1)" id="navTab1" class="flex flex-col items-center justify-center w-16 h-14 rounded-2xl text-cosmic-600 font-bold transition-all min-w-[44px] min-h-[44px]">
+                <i class="fa-solid fa-dice-five text-xl mb-1"></i>
+                <span class="text-[11px] font-semibold">สุ่ม Fact</span>
+            </button>
+
+            <button onclick="switchTab(2)" id="navTab2" class="flex flex-col items-center justify-center w-16 h-14 rounded-2xl text-gray-400 hover:text-cosmic-600 transition-all relative min-w-[44px] min-h-[44px]">
+                <i class="fa-solid fa-heart text-xl mb-1"></i>
+                <span class="text-[11px] font-semibold">รายการโปรด</span>
+                <span id="navFavDot" class="hidden absolute top-2 right-4 w-2.5 h-2.5 bg-pinkNeon rounded-full border-2 border-white"></span>
+            </button>
+
+            <button onclick="switchTab(3)" id="navTab3" class="flex flex-col items-center justify-center w-16 h-14 rounded-2xl text-gray-400 hover:text-cosmic-600 transition-all min-w-[44px] min-h-[44px]">
+                <i class="fa-solid fa-compass text-xl mb-1"></i>
+                <span class="text-[11px] font-semibold">คลังทั้งหมด</span>
+            </button>
+        </nav>
+
+        <!-- Toast Feedback Container -->
+        <div id="toastContainer" class="absolute top-16 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none w-full max-w-xs px-4"></div>
+
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // 17 Standard Categories List
+        const CATEGORIES = [
+            "สุ่มทั้งหมด",
+            "วิทยาศาสตร์ & อวกาศ",
+            "สัตว์โลกน่ารู้",
+            "ประวัติศาสตร์",
+            "ร่างกายมนุษย์",
+            "เกม",
+            "ภาพยนตร์ & ซีรีส์",
+            "การ์ตูน & อนิเมะ",
+            "อาหาร & เครื่องดื่ม",
+            "ดนตรี",
+            "ท่องเที่ยว & วัฒนธรรมแปลก",
+            "จิตวิทยา",
+            "เทคโนโลยี",
+            "กีฬา",
+            "เรื่องน่ารู้ประเทศไทย",
+            "เรื่องลึกลับ",
+            "ล้างความเชื่อผิดๆ"
+        ];
+
+        // Calendar Specific Special Days Data
+        const CALENDAR_SPECIAL_DAYS = {
+            "01-01": { title: "🎉 วันขึ้นปีใหม่สากล", hook: "รู้หรือไม่ว่าเกาะคิริบาสในมหาสมุทรแปซิฟิกเป็นสถานที่แรกในโลกที่ได้ฉลองปีใหม่ก่อนใคร!", desc: "เริ่มต้นปีใหม่ด้วยการเปิดรับสิ่งใหม่ๆ และเรียนรู้เรื่องราวทรงคุณค่ารอบตัว" },
+            "01-16": { title: "📚 วันครูแห่งชาติ", desc: "ร่วมระลึกถึงพระคุณครูผู้ประสิทธิ์ประศาสน์วิชาและสร้างแรงบันดาลใจให้ผู้เรียน" },
+            "02-14": { title: "💖 วันวาเลนไทน์ (Valentine's Day)", hook: "หัวใจของมนุษย์เต้นเฉลี่ย 100,000 ครั้งต่อวัน!", desc: "ปั๊มเลือดกว่า 7,500 ลิตรเลี้ยงทั่วร่างกายทุกวันโดยไม่มีวันหยุดพัก" },
+            "03-08": { title: "👩‍🦰 วันสตรีสากล (International Women's Day)", hook: "สตรีคนแรกของโลกที่ชนะรางวัลโนเบลคือ มารี กูรี!", desc: "และเธอยังเป็นบุคคลเดียวในประวัติศาสตร์ที่ได้รับรางวัลโนเบลในสองสาขาวิทยาศาสตร์ต่างกัน" },
+            "03-20": { title: "😃 วันความสุขโลก (International Day of Happiness)", hook: "การยิ้มทำให้สมองหลั่งสารเอ็นดอร์ฟินและโดพามีน!", desc: "แม้ว่าคุณจะแกล้งทำเป็นยิ้ม สมองก็ยังคงตอบสนองด้วยการช่วยลดความเครียดและเพิ่มความรู้สึกสุขสดชื่น" },
+            "04-13": { title: "💦 วันสงกรานต์ & วันผู้สูงอายุแห่งชาติ", hook: "สงกรานต์ได้รับการขึ้นทะเบียนเป็นมรดกวัฒนธรรมที่จับต้องไม่ได้ของมนุษยชาติ!", desc: "ร่วมสืบสานประเพณีไทย รดน้ำดำหัวขอพรผู้ใหญ่และเล่นน้ำดับร้อนอย่างมีความสุข" },
+            "04-14": { title: "🏡 วันครอบครัวแห่งชาติ", hook: "การกอดกันเกิน 20 วินาทีช่วยหลั่งฮอร์โมนออกซิโตซิน!", desc: "ช่วยลดความดันโลหิตและเพิ่มความอบอุ่นผูกพันในครอบครัว" },
+            "04-15": { title: "💦 วันสงกรานต์ (Songkran Festival)", hook: "คำว่า 'สงกรานต์' มาจากภาษาสันสกฤต แปลว่า 'การเคลื่อนย้าย'!", desc: "หมายถึงการที่ดวงอาทิตย์เคลื่อนเข้าสู่ราศีเมษอันเป็นวันขึ้นปีใหม่ไทยตามดั้งเดิม" },
+            "04-22": { title: "🌱 วันคุ้มครองโลก (Earth Day)", hook: "ต้นไม้ใหญ่ 1 ต้น สามารถผลิตออกซิเจนให้มนุษย์ 2 คนหายใจได้ตลอดทั้งปี!", desc: "ร่วมกันดูแลรักษาโลกด้วยการลดขยะและปลูกต้นไม้เพิ่มพื้นที่สีเขียว" },
+            "05-01": { title: "🛠️ วันแรงงานแห่งชาติ", hook: "รู้หรือไม่ว่า 'วันหยุดสุดสัปดาห์ 2 วัน' เริ่มต้นจากขบวนการแรงงาน!", desc: "เฮนรี ฟอร์ด เป็นหนึ่งในผู้บุกเบิกที่เปลี่ยนสัปดาห์ทำงานจาก 6 วันเหลือ 5 วันเพื่อให้คนงานมีเวลาพักผ่อน" },
+            "06-05": { title: "🌳 วันสิ่งแวดล้อมโลก", hook: "ป่าแอมะซอนผลิตออกซิเจนคิดเป็นประมาณ 20% ของออกซิเจนบนโลก!", desc: "และยังเป็นบ้านของสปีชีส์สิ่งมีชีวิต 1 ใน 10 ของโลกทั้งหมด" },
+            "07-29": { title: "🐯 วันภาษาไทยแห่งชาติ & วันเสือโลก", hook: "เสือโคร่งมีลายบน 'ผิวหนัง' ไม่ใช่แค่บนขน!", desc: "โกนขนเสือออก ลายแถบสีดำก็ยังคงปรากฏอยู่บนผิวหนังเหมือนเดิมอย่างน่าทึ่ง" },
+            "08-08": { title: "🐱 วันแมวโลก (International Cat Day)", hook: "เสียงครางครืดๆ (Purr) ของแมว มีความถี่ช่วยสมานกระดูกได้!", desc: "แมวสั่นสะเทือนความถี่ 20-140 Hz ซึ่งเป็นความถี่ที่มีวิจัยรองรับว่าช่วยเร่งการฟื้นฟูกระดูกและเนื้อเนื้อเยื่อ" },
+            "08-12": { title: "💙 วันแม่แห่งชาติ", hook: "ทารกแรกเกิดจำเสียงและกลิ่นของแม่ได้ตั้งแต่อยู่ในครรภ์!", desc: "ส่งเสริมความผูกพันอันบริสุทธิ์และลึกซึ้งในวันแม่แห่งชาติ" },
+            "08-13": { title: "🖐️ วันคนถนัดซ้ายสากล", hook: "ประชากรโลกประมาณ 10% ถนัดมือซ้าย!", desc: "คนถนัดซ้ายมักประมวลผลข้อมูลในสมองทั้งสองซีกประสานกันได้ดีเยี่ยม" },
+            "10-31": { title: "🎃 วันฮาโลวีน (Halloween)", hook: "ตะเกียงฟักทองดั้งเดิมในไอร์แลนด์ เคยใช้ 'หัวไชเท้า' ทำ!", desc: "ต่อมาเมื่อชาวไอริชอพยพไปอเมริกาจึงเปลี่ยนมาใช้ฟักทองเพราะแกะสลักง่ายกว่า" },
+            "12-05": { title: "💛 วันพ่อแห่งชาติ & วันดินโลก", hook: "ดิน 1 ช้อนชา มีสิ่งมีชีวิตจุลินทรีย์มากกว่าประชากรมนุษย์ทั้งโลกรวมกัน!", desc: "ดินเป็นรากฐานของอาหารและการดำรงอยู่ของทุกชีวิตบนโลก" },
+            "12-25": { title: "🎄 วันคริสต์มาส (Christmas Day)", hook: "เพลง Jingle Bells ดั้งเดิมแต่งขึ้นเพื่อวันขอบคุณพระเจ้า ไม่ใช่วันคริสต์มาส!", desc: "สุขสันต์วันคริสต์มาส! เทศกาลแห่งความสุขและการแบ่งปันรอยยิ้ม" },
+            "12-31": { title: "🎆 วันสิ้นปี (New Year's Eve)", hook: "การเคานต์ดาวน์ปีใหม่มีจุดเริ่มต้นที่ไทม์สแควร์มาตั้งแต่ปี 1907!", desc: "นับถอยหลังส่งท้ายปีเก่า ต้อนรับสิ่งดีๆ และความรู้ใหม่ๆ ในปีถัดไป" }
+        };
+
+        // Complete 17 Categories Facts Database
+        const FACTS_DATABASE = [
+            // 1. วิทยาศาสตร์ & อวกาศ
+            { id: 101, category: "วิทยาศาสตร์ & อวกาศ", hook: "หนึ่งวันบนดาวศุกร์ ยาวนานกว่าหนึ่งปีบนดาวศุกร์จริงหรือ?", detail: "จริง! ดาวศุกร์หมุนรอบตัวเองช้ามาก ใช้เวลา 243 วันโลก ในขณะที่ใช้เวลาหมุนรอบดวงอาทิตย์เพียง 225 วันโลกเท่านั้น" },
+            { id: 102, category: "วิทยาศาสตร์ & อวกาศ", hook: "เสียงเดินทางในอวกาศไม่ได้จริงไหม?", detail: "จริงครับ เพราะอวกาศเป็นสุญญากาศ ไม่มีโมเลกุลของอากาศหรือสสารให้คลื่นเสียงสั่นสะเทือนเพื่อเดินทางผ่านได้" },
+            { id: 103, category: "วิทยาศาสตร์ & อวกาศ", hook: "เพชรฝนตกบนดาวพฤหัสและดาวเสาร์จริงหรือ?", detail: "พายุฟ้าคะนองบนดาวพฤหัสและดาวเสาร์เปลี่ยนก๊าซมีเทนเป็นคาร์บอน แล้วตกลงมากลายเป็นไพลินและเพชรจำนวนมหาศาล!" },
+
+            // 2. สัตว์โลกน่ารู้
+            { id: 201, category: "สัตว์โลกน่ารู้", hook: "รู้ไหมว่านากทะเลจับมือกันเวลานอนเพราะอะไร?", detail: "นากทะเลจะจับมือกันแน่นขณะนอนลอยคอในน้ำ เพื่อป้องกันไม่ให้กระแสน้ำพัดพวกมันลอยแยกออกจากกันระหว่างหลับ" },
+            { id: 202, category: "สัตว์โลกน่ารู้", hook: "หัวใจของปลาวาฬสีน้ำเงินใหญ่ขนาดไหน?", detail: "หัวใจของวาฬสีน้ำเงินมีขนาดใหญ่เท่ากับรถยนต์ขนาดเล็กหนึ่งคัน และมนุษย์สามารถว่ายน้ำผ่านเส้นเลือดใหญ่ของมันได้" },
+            { id: 203, category: "สัตว์โลกน่ารู้", hook: "วัวมีเพื่อนสนิทเหมือนมนุษย์ด้วยจริงหรือ?", detail: "งานวิจัยพบว่าเมื่อวัวถูกจับแยกออกจากเพื่อนสนิท ระดับความเครียดและอัตราการเต้นหัวใจของมันจะสูงขึ้นอย่างเห็นได้ชัด" },
+
+            // 3. ประวัติศาสตร์
+            { id: 301, category: "ประวัติศาสตร์", hook: "สงครามที่สั้นที่สุดในประวัติศาสตร์โลกนานกี่นาที?", detail: "สงครามอังกฤษ-แซนซิบาร์ ในปี 1896 กินเวลาเพียง 38 ถึง 45 นาทีเท่านั้น ก่อนที่ฝ่ายแซนซิบาร์จะประกาศยอมแพ้" },
+            { id: 302, category: "ประวัติศาสตร์", hook: "ตึกเอมไพร์สเตตถูกสร้างเสร็จภายในเวลากี่ปี?", detail: "ตึกเอมไพร์สเตตอันโด่งดังในนิวยอร์ก ใช้เวลาสร้างรวดเร็วอย่างน่าเหลือเชื่อเพียง 1 ปีกับอีก 45 วันเท่านั้น" },
+
+            // 4. ร่างกายมนุษย์
+            { id: 401, category: "ร่างกายมนุษย์", hook: "ลายนิ้วมือลิ้นของมนุษย์ทุกคนไม่เหมือนกันจริงหรือ?", detail: "มนุษย์ทุกคนมีลายนิ้วมือเฉพาะตัว และลิ้นของเราก็มีรูปแบบปุ่มลิ้นเฉพาะตัวที่ไม่เหมือนใครในโลกเช่นเดียวกัน!" },
+            { id: 402, category: "ร่างกายมนุษย์", hook: "กระดูกชิ้นไหนในร่างกายมนุษย์ที่แข็งแรงที่สุด?", detail: "กระดูกต้นขา (Femur) แข็งแรงที่สุดในร่างกายมนุษย์ สามารถรับน้ำหนักได้มากกว่าคอนกรีตที่มีขนาดเท่ากัน" },
+
+            // 5. เกม
+            { id: 501, category: "เกม", hook: "เสียงเดินของ Pac-Man เกิดมาจากเสียงอะไร?", detail: "เสียงกินจุดของ Pac-Man เกิดจากการเลียนเสียงเคี้ยวอาหารคำโตๆ ในภาษาญี่ปุ่นคำว่า 'Paku-Paku'" },
+            { id: 502, category: "เกม", hook: "รู้หรือไม่ว่า Mario เคยชื่อว่าอะไรก่อนหน้านี้?", detail: "ตัวละคร Mario ในเกม Donkey Kong ยุคแรกเริ่ม มีชื่อว่า 'Jumpman' ก่อนจะถูกเปลี่ยนชื่อตามเจ้าของโกดังเช่า Nintendo ในอเมริกา" },
+
+            // 6. ภาพยนตร์ & ซีรีส์
+            { id: 601, category: "ภาพยนตร์ & ซีรีส์", hook: "เสียงร้องของ T-Rex ใน Jurassic Park ทำมาจากเสียงอะไร?", detail: "ผู้กำกับเสียงใช้การผสมผสานเสียงของสัตว์หลายชนิด เช่น เสียงลูกช้างร้อง เสียงเสือโฮก และเสียงเต่าทะเลผสมพันธุ์กัน!" },
+            { id: 602, category: "ภาพยนตร์ & ซีรีส์", hook: "โค้ดสีเขียวลอยๆ ในเรื่อง The Matrix คืออะไร?", detail: "ตัวอักษรสีเขียววิ่งลงมาสุดเท่ใน The Matrix จริงๆ แล้วคือสูตรทำซูชิภาษาญี่ปุ่นจากหนังสือทำอาหารของภรรยาของดีไซเนอร์!" },
+
+            // 7. การ์ตูน & อนิเมะ
+            { id: 701, category: "การ์ตูน & อนิเมะ", hook: "ทำไมปิกาจู (Pikachu) ถึงร้องแค่ชื่อตัวเอง?", detail: "เพื่อให้จดจำง่ายในระดับสากล โดยชื่อ 'Pika' มาจากเสียงไฟช็อต และ 'Chu' คือเสียงร้องของหนูในภาษาญี่ปุ่น" },
+            { id: 702, category: "การ์ตูน & อนิเมะ", hook: "อาจารย์ผู้แต่ง One Piece เคยบอกว่าจะแต่งกี่ปีจบ?", detail: "เดิมทีอาจารย์เอย์อิชิโร โอดะ วางแผนจะแต่ง One Piece ให้จบภายใน 5 ปี แต่ปัจจุบันแต่งมาแล้วกว่า 25 ปี!" },
+
+            // 8. อาหาร & เครื่องดื่ม
+            { id: 801, category: "อาหาร & เครื่องดื่ม", hook: "น้ำผึ้งแท้สามารถเสียหรือบูดได้ไหม?", detail: "น้ำผึ้งบริสุทธิ์ไม่มีวันหมดอายุหรือบูดเสีย! เนื่องจากมีความชื้นต่ำและกรดสูง แบคทีเรียจึงไม่สามารถเจริญเติบโตได้ เคยพบน้ำผึ้ง 3,000 ปีในพีระมิดที่ยังกินได้" },
+            { id: 802, category: "อาหาร & เครื่องดื่ม", hook: "ไวท์ช็อกโกแลต ไม่ใช่ช็อกโกแลตจริงหรือ?", detail: "จริง! เพราะไวท์ช็อกโกแลตไม่มีส่วนผสมของโกโก้แมส (Cocoa Mass) แต่ทำจากไขมันโกโก้ (Cocoa Butter) ผสมน้ำตาลและนมเท่านั้น" },
+
+            // 9. ดนตรี
+            { id: 901, category: "ดนตรี", hook: "ดนตรีช่วยให้พืชเจริญเติบโตเร็วขึ้นจริงไหม?", detail: "งานวิจัยพบว่าการเปิดดนตรีคลาสสิกช่วยกระตุ้นการเปิดปากใบของพืช ทำให้พืชดูดซึมสารอาหารได้ดีขึ้น" },
+            { id: 902, category: "ดนตรี", hook: "เพลงที่สั้นที่สุดในโลกมีความยาวกี่วินาที?", detail: "เพลง 'You Suffer' ของวง Napalm Death ถูกบันทึกใน Guinness World Records ว่าสั้นที่สุดในโลก ยาวเพียง 1.316 วินาที" },
+
+            // 10. ท่องเที่ยว & วัฒนธรรมแปลก
+            { id: 1001, category: "ท่องเที่ยว & วัฒนธรรมแปลก", hook: "ประเทศไหนในโลกที่ไม่มียุงเลยสักตัว?", detail: "ประเทศไอซ์แลนด์ (Iceland) เป็นหนึ่งในไม่กี่พื้นที่บนโลกที่ไม่มียุงเลย เนื่องจากสภาพอากาศและสภาพแวดล้อมไม่เหมาะกับการเพาะพันธุ์" },
+            { id: 1002, category: "ท่องเที่ยว & วัฒนธรรมแปลก", hook: "ในอิตาลี การใส่สับปะรดบนพิซซ่าถือเป็นเรื่องรุนแรงขนาดไหน?", detail: "ชาวอิตาเลียนดั้งเดิมมองว่าการใส่สับปะรดบนพิซซ่าเป็นการทำลายวัฒนธรรมอาหาร ร้านพิซซ่าดั้งเดิมหลายแห่งปฏิเสธที่จะขายพิซซ่าฮาวายเอียน" },
+
+            // 11. จิตวิทยา
+            { id: 1101, category: "จิตวิทยา", hook: "ทำไมเวลาเราเห็นคนหาว แล้วเรามักจะหาวตาม?", detail: "เกิดจาก 'Mirror Neurons' ในสมอง ซึ่งเกี่ยวกับความสามารถในการรับรู้และเห็นอกเห็นใจผู้อื่น (Empathy)" },
+            { id: 1102, category: "จิตวิทยา", hook: "ปรากฏการณ์ Deja Vu (เดจาวู) เกิดจากอะไร?", detail: "เกิดจากสมองส่วนความจำทำงานผิดพลาดชั่วขณะ โดยส่งข้อมูลที่เพิ่งรับรู้ไปเก็บไว้ในส่วนความจำระยะยาวทันที ทำให้เราคิดว่าเคยเจอเหตุการณ์นี้มาแล้ว" },
+
+            // 12. เทคโนโลยี
+            { id: 1201, category: "เทคโนโลยี", hook: "คำว่า 'Bug' ในคอมพิวเตอร์ มีที่มาจากแมลงจริงๆ หรือไม่?", detail: "ใช่ครับ! ในปี 1947 นักคอมพิวเตอร์พบแมลงโมธ (Moth) เข้าไปติดอยู่ในเครื่อง Harvard Mark II จนระบบขัดข้อง จึงเป็นที่มาของคำว่า Debugging" },
+            { id: 1202, category: "เทคโนโลยี", hook: "อีเมลแรกบนโลกส่งข้อความว่าอะไร?", detail: "Ray Tomlinson ส่งข้อความแรกในปี 1971 ว่า 'QWERTYUIOP' ซึ่งเป็นเพียงการพิมพ์ตัวอักษรแถวบนสุดของคีย์บอร์ดสุ่มๆ" },
+
+            // 13. กีฬา
+            { id: 1301, category: "กีฬา", hook: "ลูกบอลกอล์ฟมีรอยบุ๋ม (Dimples) ไว้เพื่ออะไร?", detail: "รอยบุ๋มช่วยลดแรงต้านอากาศ (Drag) และสร้างแรงยก ทำให้ลูกกอล์ฟลอยไปได้ไกลกว่าลูกพื้นผิวเรียบถึง 2 เท่า!" },
+            { id: 1302, category: "กีฬา", hook: "ทำไมเหรียญทองโอลิมปิกถึงไม่ได้ทำจากทองคำแท้ทั้งเหรียญ?", detail: "เหรียญทองโอลิมปิกทำจากเงินแท้ 92.5% และชุบด้วยทองคำแท้บริสุทธิ์เพียงประมาณ 6 กรัมเท่านั้นตามมาตรฐาน IOC" },
+
+            // 14. เรื่องน่ารู้ประเทศไทย
+            { id: 1401, category: "เรื่องน่ารู้ประเทศไทย", hook: "กรุงเทพมหานคร มีชื่อเมืองที่ยาวที่สุดในโลกจริงไหม?", detail: "จริงครับ! Guinness World Records บันทึกว่าชื่อเต็มของกรุงเทพฯ เป็นชื่อสถานที่ยาวที่สุดในโลก มีความยาวถึง 168 ตัวอักษร" },
+            { id: 1402, category: "เรื่องน่ารู้ประเทศไทย", hook: "ทำไมรถตุ๊กตุ๊กไทยถึงมีเสียงพ่นไอเสียเป็นเอกลักษณ์?", detail: "เกิดจากเครื่องยนต์ 2 จังหวะยุคเก่าที่ใช้ในรถสามล้อ ซึ่งส่งเสียงพ่นไอเสียเป็นจังหวะจนกลายเป็นเอกลักษณ์เฉพาะตัว" },
+
+            // 15. เรื่องลึกลับ
+            { id: 1501, category: "เรื่องลึกลับ", hook: "สามเหลี่ยมเบอร์มิวดา เรือหายสาบสูญเยอะกว่าที่อื่นจริงหรือ?", detail: "สถิติย่อยภัยทางทะเลสากลระบุว่า สามเหลี่ยมเบอร์มิวดามีอัตราอุบัติเหตุเรือและเครื่องบินหายไม่ต่างจากพื้นที่มหาสมุทรอื่นในโลกเลย" },
+            { id: 1502, category: "เรื่องลึกลับ", hook: "สัญญาณ 'WOW!' จากอวกาศปี 1977 คืออะไร?", detail: "เป็นสัญญาณวิทยุความถี่แคบที่ดักจับได้จากอวกาศนาน 72 วินาที มีสเปกตรัมเหมือนมาจากสิ่งมีชีวิตทรงปัญญา แต่จนถึงปัจจุบันยังจับสัญญาณนี้ไม่ได้อีกเลย" },
+
+            // 16. ล้างความเชื่อผิดๆ
+            { id: 1601, category: "ล้างความเชื่อผิดๆ", hook: "กำแพงเมืองจีน มองเห็นได้จากอวกาศด้วยตาเปล่าจริงหรือ?", detail: "ไม่จริง! NASA ยืนยันว่ากำแพงเมืองจีนมีความกว้างเพียงไม่กี่เมตรและสีกลมกลืนกับพื้นดิน ไม่สามารถมองเห็นด้วยตาเปล่าจากวงโคจรโลก" },
+            { id: 1602, category: "ล้างความเชื่อผิดๆ", hook: "มนุษย์ใช้สมองเพียง 10% ของทั้งหมดจริงหรือ?", detail: "ไม่จริงครับ! ภาพถ่ายสแกนสมอง (fMRI) พิสูจน์แล้วว่ามนุษย์ใช้สมองเกือบทุกส่วนทำงานประสานกันตลอด 24 ชั่วโมง เพียงแต่ใช้งานต่างหน้าที่กัน" }
+        ];
+
+        // Application State
+        let currentFact = null;
+        let favoriteIds = [];
+        let votedFacts = {};
+        let currentTab = 1;
+        let selectedCategory = "สุ่มทั้งหมด";
+
+        // DOM Element References
+        const flipCardInner = document.getElementById('flipCardInner');
+        const categorySelect = document.getElementById('categorySelect');
+        const nextFactBtn = document.getElementById('nextFactBtn');
+        const searchInput = document.getElementById('searchInput');
+
+        window.addEventListener('load', () => {
+            initDateAndBannerLogic();
+            loadLocalStorage();
+            populateCategoryDropdown();
+            populateExploreCategoryPills();
+            getRandomFact();
+            renderFavorites();
+            renderExploreList();
+            setupZoomAndTouchControls();
+        });
+
+        // Instant Answer Banner Handler (No Click Required)
+        function initDateAndBannerLogic() {
+            const now = new Date();
+            const thaiDays = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
+            const thaiMonths = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+            
+            const dayName = thaiDays[now.getDay()];
+            const dateNum = now.getDate();
+            const monthNum = now.getMonth() + 1;
+            const monthName = thaiMonths[now.getMonth()];
+            const yearBE = now.getFullYear() + 543;
+
+            document.getElementById('currentDateText').innerText = `วัน${dayName}ที่ ${dateNum} ${monthName} ${yearBE}`;
+
+            // Check against Calendar Special Days
+            const key = `${String(monthNum).padStart(2, '0')}-${String(dateNum).padStart(2, '0')}`;
+            const specialInfo = CALENDAR_SPECIAL_DAYS[key];
+
+            const badgeTag = document.getElementById('specialBadgeTag');
+            const titleEl = document.getElementById('todaySpecialTitle');
+            const hookEl = document.getElementById('todaySpecialHook');
+            const descEl = document.getElementById('todaySpecialDesc');
+
+            if (specialInfo) {
+                badgeTag.classList.remove('hidden');
+                titleEl.innerText = specialInfo.title;
+                hookEl.innerText = specialInfo.hook || "เรื่องน่ารู้ประจำวันสำคัญ!";
+                descEl.innerText = specialInfo.desc;
+            } else {
+                badgeTag.classList.add('hidden');
+                
+                // Pick a daily featured fact systematically based on date
+                const featuredIndex = (dateNum * monthNum) % FACTS_DATABASE.length;
+                const featuredFact = FACTS_DATABASE[featuredIndex];
+
+                titleEl.innerText = `💡 เรื่องน่ารู้ประจำวัน: ${featuredFact.category}`;
+                hookEl.innerText = `"${featuredFact.hook}"`;
+                descEl.innerText = featuredFact.detail; // Full answer revealed immediately
+            }
+        }
+
+        function loadLocalStorage() {
+            const savedFavs = localStorage.getItem('factverse_favorites');
+            if (savedFavs) {
+                try { favoriteIds = JSON.parse(savedFavs); } catch (e) { favoriteIds = []; }
+            }
+            const savedVotes = localStorage.getItem('factverse_votes');
+            if (savedVotes) {
+                try { votedFacts = JSON.parse(savedVotes); } catch (e) { votedFacts = {}; }
+            }
+            updateFavBadges();
+        }
+
+        function saveFavoritesToStorage() {
+            localStorage.setItem('factverse_favorites', JSON.stringify(favoriteIds));
+            updateFavBadges();
+        }
+
+        function saveVotesToStorage() {
+            localStorage.setItem('factverse_votes', JSON.stringify(votedFacts));
+        }
+
+        function updateFavBadges() {
+            const count = favoriteIds.length;
+            document.getElementById('favCountBadge').innerText = count;
+            document.getElementById('favCountTag').innerText = `${count} รายการ`;
+            
+            const navFavDot = document.getElementById('navFavDot');
+            if (count > 0) {
+                navFavDot.classList.remove('hidden');
+            } else {
+                navFavDot.classList.add('hidden');
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'glass-badge border border-indigo-200 text-cosmic-900 font-semibold px-4 py-2.5 rounded-2xl shadow-lg text-xs text-center animate-toast bg-white/95';
+            toast.innerText = message;
+            
+            const container = document.getElementById('toastContainer');
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.remove();
+            }, 2000);
+        }
+
+        function populateCategoryDropdown() {
+            categorySelect.innerHTML = '';
+            CATEGORIES.forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.textContent = cat;
+                categorySelect.appendChild(opt);
+            });
+
+            categorySelect.addEventListener('change', (e) => {
+                selectedCategory = e.target.value;
+                getRandomFact();
+            });
+        }
+
+        function populateExploreCategoryPills() {
+            const container = document.getElementById('exploreCategoryPills');
+            container.innerHTML = '';
+            CATEGORIES.forEach((cat, idx) => {
+                const btn = document.createElement('button');
+                btn.className = `px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all border shrink-0 ${idx === 0 ? 'bg-cosmic-600 text-white border-cosmic-600 font-medium' : 'bg-white/90 text-gray-700 border-indigo-100'}`;
+                btn.innerText = cat;
+                btn.onclick = () => {
+                    Array.from(container.children).forEach(c => {
+                        c.className = 'px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all border shrink-0 bg-white/90 text-gray-700 border-indigo-100';
+                    });
+                    btn.className = 'px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all border shrink-0 bg-cosmic-600 text-white border-cosmic-600 font-medium';
+                    renderExploreList(cat, searchInput.value);
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function getRandomFact() {
+            // Flip back to front before changing content
+            flipCardInner.classList.remove('is-flipped');
+
+            setTimeout(() => {
+                let filtered = FACTS_DATABASE;
+                if (selectedCategory !== "สุ่มทั้งหมด") {
+                    filtered = FACTS_DATABASE.filter(f => f.category === selectedCategory);
+                }
+
+                if (filtered.length === 0) filtered = FACTS_DATABASE;
+
+                let next;
+                do {
+                    next = filtered[Math.floor(Math.random() * filtered.length)];
+                } while (filtered.length > 1 && currentFact && next.id === currentFact.id);
+
+                currentFact = next;
+                updateCardUI();
+            }, 200);
+        }
+
+        function updateCardUI() {
+            if (!currentFact) return;
+
+            const categoryIcons = {
+                "วิทยาศาสตร์ & อวกาศ": "🚀",
+                "สัตว์โลกน่ารู้": "🐱",
+                "ประวัติศาสตร์": "📜",
+                "ร่างกายมนุษย์": "🧬",
+                "เกม": "🎮",
+                "ภาพยนตร์ & ซีรีส์": "🎬",
+                "การ์ตูน & อนิเมะ": "⚡",
+                "อาหาร & เครื่องดื่ม": "🍕",
+                "ดนตรี": "🎵",
+                "ท่องเที่ยว & วัฒนธรรมแปลก": "🗺️",
+                "จิตวิทยา": "🧠",
+                "เทคโนโลยี": "💻",
+                "กีฬา": "⚽",
+                "เรื่องน่ารู้ประเทศไทย": "🐘",
+                "เรื่องลึกลับ": "🔮",
+                "ล้างความเชื่อผิดๆ": "💡"
+            };
+
+            const icon = categoryIcons[currentFact.category] || "❓";
+
+            // Front Card UI
+            document.getElementById('cardCategoryFront').innerText = currentFact.category;
+            document.getElementById('cardHookText').innerText = currentFact.hook;
+            document.getElementById('cardIconFront').innerText = icon;
+            document.getElementById('factIdFront').innerText = String(currentFact.id).padStart(3, '0');
+
+            // Back Card UI
+            document.getElementById('cardCategoryBack').innerText = currentFact.category;
+            document.getElementById('cardTitleBack').innerText = currentFact.hook;
+            document.getElementById('cardDetailBack').innerText = currentFact.detail;
+
+            // Favorite Hearts
+            const isFav = favoriteIds.includes(currentFact.id);
+            updateHeartButton('favBtnFront', isFav);
+            updateHeartButton('favBtnBack', isFav);
+
+            // Update Mind-Blowing Gauge
+            updateReactionDisplay();
+        }
+
+        function updateHeartButton(btnId, isFav) {
+            const btn = document.getElementById(btnId);
+            if (isFav) {
+                btn.className = "w-11 h-11 rounded-full bg-pink-50 shadow-md flex items-center justify-center text-pinkNeon transition-all active:scale-90 min-w-[44px] min-h-[44px]";
+            } else {
+                btn.className = "w-11 h-11 rounded-full bg-white shadow-md flex items-center justify-center text-gray-400 hover:text-pinkNeon transition-all active:scale-90 min-w-[44px] min-h-[44px]";
+            }
+        }
+
+        function toggleFavorite(factId) {
+            const index = favoriteIds.indexOf(factId);
+            if (index > -1) {
+                favoriteIds.splice(index, 1);
+                showToast("ลบออกจากรายการโปรดแล้ว");
+            } else {
+                favoriteIds.push(factId);
+                showToast("บันทึกในรายการโปรดแล้ว! 💖");
+            }
+            saveFavoritesToStorage();
+            if (currentFact && currentFact.id === factId) {
+                updateHeartButton('favBtnFront', favoriteIds.includes(factId));
+                updateHeartButton('favBtnBack', favoriteIds.includes(factId));
+            }
+            renderFavorites();
+            renderExploreList(undefined, searchInput.value);
+        }
+
+        // Card flip listener
+        flipCardInner.addEventListener('click', (e) => {
+            if (e.target.closest('button')) return; 
+            flipCardInner.classList.toggle('is-flipped');
+        });
+
+        // Next button listener
+        nextFactBtn.addEventListener('click', () => {
+            getRandomFact();
+        });
+
+        // Favorite Buttons listeners
+        document.getElementById('favBtnFront').addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (currentFact) toggleFavorite(currentFact.id);
+        });
+        document.getElementById('favBtnBack').addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (currentFact) toggleFavorite(currentFact.id);
+        });
+
+        function voteFact(reactionType) {
+            if (!currentFact) return;
+            votedFacts[currentFact.id] = reactionType;
+            saveVotesToStorage();
+            updateReactionDisplay();
+            
+            const reactionNames = {
+                'mindBlowing': '🤯 บันทึกระดับความพีค: พีคมาก!',
+                'aha': '✨ บันทึกระดับความพีค: ว้าวมาก!',
+                'meh': '💡 บันทึกระดับความพีค: เคยรู้แล้ว'
+            };
+            showToast(reactionNames[reactionType] || "บันทึกการโหวตแล้ว");
+        }
+
+        function updateReactionDisplay() {
+            if (!currentFact) return;
+
+            const seed = currentFact.id;
+            let mindBlowingPct = (seed * 19) % 40 + 40;
+            let ahaPct = (seed * 13) % 25 + 15;
+            let mehPct = 100 - mindBlowingPct - ahaPct;
+
+            const userVote = votedFacts[currentFact.id];
+
+            if (userVote === 'mindBlowing') mindBlowingPct += 5;
+            if (userVote === 'aha') ahaPct += 5;
+            if (userVote === 'meh') mehPct += 5;
+
+            const total = mindBlowingPct + ahaPct + mehPct;
+            const finalMB = Math.round((mindBlowingPct / total) * 100);
+            const finalAha = Math.round((ahaPct / total) * 100);
+            const finalMeh = 100 - finalMB - finalAha;
+
+            document.getElementById('cntMindBlowing').innerText = `${finalMB}%`;
+            document.getElementById('cntAha').innerText = `${finalAha}%`;
+            document.getElementById('cntMeh').innerText = `${finalMeh}%`;
+
+            document.getElementById('barMindBlowing').style.width = `${finalMB}%`;
+            document.getElementById('barAha').style.width = `${finalAha}%`;
+            document.getElementById('barMeh').style.width = `${finalMeh}%`;
+
+            const btns = document.getElementById('meterButtons').querySelectorAll('button');
+            
+            btns[0].className = `py-1.5 px-1 rounded-xl border text-[11px] font-medium shadow-sm flex flex-col items-center justify-center min-h-[44px] active:scale-95 transition-all ${userVote === 'mindBlowing' ? 'bg-gradient-to-r from-cosmic-600 to-violetAccent text-white border-cosmic-600 font-bold' : 'bg-white hover:bg-purple-50 text-cosmic-900 border-indigo-100'}`;
+            btns[1].className = `py-1.5 px-1 rounded-xl border text-[11px] font-medium shadow-sm flex flex-col items-center justify-center min-h-[44px] active:scale-95 transition-all ${userVote === 'aha' ? 'bg-gradient-to-r from-cosmic-600 to-violetAccent text-white border-cosmic-600 font-bold' : 'bg-white hover:bg-purple-50 text-cosmic-900 border-indigo-100'}`;
+            btns[2].className = `py-1.5 px-1 rounded-xl border text-[11px] font-medium shadow-sm flex flex-col items-center justify-center min-h-[44px] active:scale-95 transition-all ${userVote === 'meh' ? 'bg-gradient-to-r from-cosmic-600 to-violetAccent text-white border-cosmic-600 font-bold' : 'bg-white hover:bg-purple-50 text-cosmic-900 border-indigo-100'}`;
+
+            document.getElementById('cntMindBlowing').className = userVote === 'mindBlowing' ? 'text-[10px] text-white font-bold mt-0.5' : 'text-[10px] text-cosmic-600 font-bold mt-0.5';
+            document.getElementById('cntAha').className = userVote === 'aha' ? 'text-[10px] text-white font-bold mt-0.5' : 'text-[10px] text-cosmic-600 font-bold mt-0.5';
+            document.getElementById('cntMeh').className = userVote === 'meh' ? 'text-[10px] text-white font-bold mt-0.5' : 'text-[10px] text-cosmic-600 font-bold mt-0.5';
+        }
+
+        function renderFavorites() {
+            const listEl = document.getElementById('favoritesList');
+            const favFacts = FACTS_DATABASE.filter(f => favoriteIds.includes(f.id));
+
+            if (favFacts.length === 0) {
+                listEl.innerHTML = `
+                    <div class="glass-card rounded-2xl p-8 text-center border border-white/80 my-6">
+                        <div class="text-5xl mb-3 opacity-60">💖</div>
+                        <h3 class="text-base font-bold text-cosmic-900 mb-1">ยังไม่มีรายการโปรด</h3>
+                        <p class="text-xs text-gray-500 mb-4 leading-relaxed">
+                            กดปุ่มหัวใจบนการ์ดเรื่องน่ารู้เพื่อบันทึกไว้เปิดอ่านทีหลังได้ที่นี่
+                        </p>
+                        <button onclick="switchTab(1)" class="px-5 py-2.5 bg-cosmic-600 text-white text-xs font-bold rounded-xl shadow-md active:scale-95 transition-all">
+                            ไปสุ่ม Fact เลย ✨
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            listEl.innerHTML = favFacts.map(fact => `
+                <div class="glass-card rounded-2xl p-4 border border-white/80 shadow-sm relative transition-all hover:shadow-md">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="px-2.5 py-0.5 bg-cosmic-100 text-cosmic-700 rounded-full text-[11px] font-semibold">
+                            ${fact.category}
+                        </span>
+                        <button onclick="toggleFavorite(${fact.id})" class="text-pinkNeon p-1 hover:opacity-80 active:scale-90 min-w-[36px] min-h-[36px] flex items-center justify-center">
+                            <i class="fa-solid fa-heart text-base"></i>
+                        </button>
+                    </div>
+                    <h4 class="text-sm font-bold text-cosmic-900 mb-1 leading-snug">${fact.hook}</h4>
+                    <p class="text-xs text-gray-700 leading-relaxed">${fact.detail}</p>
+                </div>
+            `).join('');
+        }
+
+        function renderExploreList(catFilter = "สุ่มทั้งหมด", searchText = "") {
+            const listEl = document.getElementById('exploreList');
+            let results = FACTS_DATABASE;
+
+            if (catFilter && catFilter !== "สุ่มทั้งหมด") {
+                results = results.filter(f => f.category === catFilter);
+            }
+
+            if (searchText.trim() !== "") {
+                const q = searchText.toLowerCase().trim();
+                results = results.filter(f => 
+                    f.hook.toLowerCase().includes(q) || 
+                    f.detail.toLowerCase().includes(q) || 
+                    f.category.toLowerCase().includes(q)
+                );
+            }
+
+            if (results.length === 0) {
+                listEl.innerHTML = `
+                    <div class="glass-card rounded-2xl p-6 text-center border border-white/80 my-4">
+                        <div class="text-4xl mb-2">🔍</div>
+                        <p class="text-sm font-medium text-gray-600">ไม่พบเรื่องน่ารู้ที่ตรงกับคำค้นหาของคุณ</p>
+                    </div>
+                `;
+                return;
+            }
+
+            listEl.innerHTML = results.map(fact => {
+                const isFav = favoriteIds.includes(fact.id);
+                return `
+                    <div class="glass-card rounded-2xl p-4 border border-white/80 shadow-sm relative transition-all">
+                        <div class="flex justify-between items-start mb-1.5">
+                            <span class="px-2.5 py-0.5 bg-indigo-50 text-cosmic-600 rounded-full text-[11px] font-semibold border border-indigo-100">
+                                ${fact.category}
+                            </span>
+                            <button onclick="toggleFavorite(${fact.id})" class="${isFav ? 'text-pinkNeon' : 'text-gray-300'} hover:text-pinkNeon p-1 active:scale-90 min-w-[36px] min-h-[36px] flex items-center justify-center">
+                                <i class="fa-solid fa-heart text-base"></i>
+                            </button>
+                        </div>
+                        <h4 class="text-sm font-bold text-cosmic-900 mb-1 leading-snug">${fact.hook}</h4>
+                        <p class="text-xs text-gray-700 leading-relaxed">${fact.detail}</p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Search listener
+        searchInput.addEventListener('input', (e) => {
+            renderExploreList(undefined, e.target.value);
+        });
+
+        function switchTab(tabIndex) {
+            currentTab = tabIndex;
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            
+            const selectedTab = document.getElementById(`tab${tabIndex}`);
+            if (selectedTab) selectedTab.classList.remove('hidden');
+
+            for (let i = 1; i <= 3; i++) {
+                const navBtn = document.getElementById(`navTab${i}`);
+                if (i === tabIndex) {
+                    navBtn.className = "flex flex-col items-center justify-center w-16 h-14 rounded-2xl text-cosmic-600 font-bold transition-all min-w-[44px] min-h-[44px]";
+                } else {
+                    navBtn.className = "flex flex-col items-center justify-center w-16 h-14 rounded-2xl text-gray-400 hover:text-cosmic-600 transition-all relative min-w-[44px] min-h-[44px]";
+                }
+            }
+
+            if (tabIndex === 2) renderFavorites();
+            if (tabIndex === 3) renderExploreList(undefined, searchInput.value);
+        }
+
+        // Touch & Zoom Controls
+        function setupZoomAndTouchControls() {
+            document.addEventListener('touchstart', (e) => {
+                if (e.touches.length > 1) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', (e) => {
+                const now = (new Date()).getTime();
+                if (now - lastTouchEnd <= 300) {
+                    e.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, false);
+
+            document.addEventListener('wheel', (e) => {
+                if (e.ctrlKey) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+        }
+    </script>
+</body>
+</html>
